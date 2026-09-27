@@ -56,7 +56,7 @@ fi
 
 APP_DIR="$( (unzip -Z1 "$IN" 2>/dev/null || true) | grep -oE '^Payload/[^/]+\.app/' | sort -u | head -1)"
 [ -n "$APP_DIR" ] || { echo "no Payload/*.app in $IN" >&2; exit 1; }
-SPOTIFY_VERSION="$(unzip -p "$IN" "${APP_DIR}Info.plist" > "$ROOT/out/.info.plist" && plutil -extract CFBundleShortVersionString raw -o - "$ROOT/out/.info.plist")"
+SPOTIFY_VERSION="$( (unzip -p "$IN" "${APP_DIR}Info.plist" > "$ROOT/out/.info.plist" 2>/dev/null || true) && plutil -extract CFBundleShortVersionString raw -o - "$ROOT/out/.info.plist" )"
 rm -f "$ROOT/out/.info.plist"
 # The name carries the mod's version, not Spotify's: it is the one the About page shows and the one
 # worth telling builds apart by. version.txt is read the way tweak/Makefile reads it, so a build from
@@ -91,7 +91,7 @@ FILES=("$TWEAK_DEB")
 # The Live Activity (Shared/LiveActivity) draws in a widget extension of its own.
 if xcrun --sdk iphoneos --find swiftc >/dev/null 2>&1; then
   EXT_DIR="$ROOT/out/extension"
-  unzip -p "$IN" "${APP_DIR}Info.plist" > "$ROOT/out/.info.plist"
+  unzip -p "$IN" "${APP_DIR}Info.plist" > "$ROOT/out/.info.plist" 2>/dev/null || true
   "$ROOT/scripts/build-extension.sh" "$ROOT/out/.info.plist" "$EXT_DIR"
   rm -f "$ROOT/out/.info.plist"
   FILES+=("$EXT_DIR/SpotifyGlassLiveActivity.appex")
